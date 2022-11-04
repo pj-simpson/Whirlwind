@@ -1,0 +1,26 @@
+version: '3'
+services:
+  a1:
+    build: .
+    environment:
+      - APP=a
+    ports:
+      - "8081:5001"
+  a2:
+    build: .
+    environment:
+      - APP=a
+    ports:
+      - "8082:5001"
+  b1:
+    build: .
+    environment:
+      - APP=b
+    ports:
+      - "9081:5001"
+  b2:
+    build: .
+    environment:
+      - APP=b
+    ports:
+      - "9082:5001"
