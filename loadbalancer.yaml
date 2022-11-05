@@ -1,0 +1,18 @@
+hosts:
+  - host: www.a.com
+    servers:
+      - localhost:8081
+      - localhost:8082
+  - host: www.b.com
+    servers:
+      - localhost:9081
+      - localhost:9082
+paths:
+  - path: /a
+    servers:
+      - localhost:8081
+      - localhost:8082
+  - path: /b
+    servers:
+      - localhost:9081
+      - localhost:9082
