@@ -1,6 +1,6 @@
 import unittest
 
-from whirlwind.whirlwind import make_app
+from src.whirlwind.whirlwind import make_app
 
 from tornado.testing import AsyncHTTPTestCase
 
