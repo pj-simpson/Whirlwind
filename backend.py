@@ -1,17 +1,21 @@
 import os
+
 from bottle import Bottle
 
 app = Bottle()
 
 
-APP_NAME = os.environ.get("APP","Default")
+APP_NAME = os.environ.get("APP", "Default")
 
-@app.route('/')
+
+@app.route("/")
 def index():
-    return f'This is the {APP_NAME} application.'
+    return f"This is the {APP_NAME} application."
 
-@app.route('/healthcheck')
+
+@app.route("/healthcheck")
 def healthcheck():
-    return 'Healthcheck passed'
+    return "Healthcheck passed"
 
-app.run(host='0.0.0.0', port=5001)
+
+app.run(host="0.0.0.0", port=5001)
