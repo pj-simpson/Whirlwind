@@ -3,7 +3,7 @@ import tornado.options
 import tornado.web
 from tornado.options import define, options
 
-from .handlers.base_handlers import ConfigReadingRequestHandler
+from loadbalancer.handlers.base_handlers import ConfigReadingRequestHandler
 
 define("port", default=8000, type=int)
 
@@ -13,7 +13,7 @@ class HostRouter(ConfigReadingRequestHandler):
         await self.healthcheck()
         host_header = self.request.headers["Host"]
         if host_header:
-            await self.forward_incoming_request_to_server("host", "hosts", host_header)
+            await self.forward_incoming_request_to_server(host_header)
         else:
             self.set_status(400, "No host header detected")
 
@@ -22,7 +22,7 @@ class PathRouter(ConfigReadingRequestHandler):
     async def get(self, path: str) -> None:
         full_path = "/" + path
         await self.healthcheck()
-        await self.forward_incoming_request_to_server("path", "paths", full_path)
+        await self.forward_incoming_request_to_server(full_path)
 
 
 def make_app() -> tornado.web.Application:

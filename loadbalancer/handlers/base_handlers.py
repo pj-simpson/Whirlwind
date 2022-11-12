@@ -1,10 +1,11 @@
 import random
+import typing
 
 import tornado.web
 import yaml
 from tornado.httpclient import AsyncHTTPClient
 
-from whirlwind.servers.backend_servers import Server
+from loadbalancer.servers.backend_servers import Server
 
 
 class ConfigReadingRequestHandler(tornado.web.RequestHandler):
@@ -50,34 +51,31 @@ class ConfigReadingRequestHandler(tornado.web.RequestHandler):
     # }
 
     async def healthcheck(self) -> None:
-        for host in self.register:
-            for server in self.register[host]:
+        for item in self.register:
+            for server in self.register[item]:
                 await server.do_healthcheck_and_update_status()
 
-    def get_healthy_server(self, host_or_path: str) -> None:
-        try:
+    def get_healthy_server(self, host_or_path: str) -> typing.Union[Server, str]:
+        if host_or_path in self.register.keys():
             return random.choice(
                 [server for server in self.register[host_or_path] if server.healthy]
             )
-        except IndexError:
-            return None
+        else:
+            return "Raise 404"
 
     async def forward_incoming_request_to_server(
-        self, singular: str, plural: str, attrib: str
+        self,
+        host_or_path: str,
     ) -> None:
         http_client = AsyncHTTPClient()
-        for entry in self.config[plural]:
-            if (attrib) == entry[singular]:
-                healthy_server = self.get_healthy_server(entry[singular])
-                if not healthy_server:
-                    self.set_status(503, "No healthy backend servers found")
-                else:
-                    response = await http_client.fetch(
-                        f"http://{healthy_server.endpoint}"
-                    )
-                    response_message = response.body.decode("utf-8")
-                    self.set_status(response.code)
-                    self.write(response_message)
-            else:
-                self.set_status(404, "Not Found")
-        http_client.close()
+        healthy_server = self.get_healthy_server(host_or_path)
+        # TODO This is nasty sort this
+        if healthy_server == "Raise 404":
+            self.set_status(404)
+        elif type(healthy_server) == Server:
+            response = await http_client.fetch(f"http://{healthy_server.endpoint}")
+            response_message = response.body.decode("utf-8")
+            self.set_status(response.code)
+            self.write(response_message)
+        else:
+            self.set_status(503, "No healthy backend servers found")

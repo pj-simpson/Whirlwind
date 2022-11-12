@@ -1,4 +1,4 @@
 test:
-	docker-compose up -d
+	docker-compose -f tests/integration_tests.yml up -d
 	python -m unittest tests/test_loadbalancer.py
-	docker-compose down
+	docker-compose -f tests/integration_tests.yml down

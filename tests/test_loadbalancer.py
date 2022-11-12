@@ -2,7 +2,7 @@ import unittest
 
 from tornado.testing import AsyncHTTPTestCase
 
-from src.whirlwind.whirlwind import make_app
+from main import make_app
 
 
 class TestHelloApp(AsyncHTTPTestCase):

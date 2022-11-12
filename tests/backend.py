@@ -1,4 +1,4 @@
-# outrageously bottle app for integration integration_tests
+# outrageously bottle app for integration tests
 import os
 
 from bottle import Bottle
