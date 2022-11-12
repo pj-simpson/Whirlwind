@@ -3,8 +3,7 @@ import tornado.options
 import tornado.web
 from tornado.options import define, options
 
-from src.whirlwind.base_handlers.base_handlers import \
-    ConfigReadingRequestHandler
+from .handlers.base_handlers import ConfigReadingRequestHandler
 
 define("port", default=8000, type=int)
 
@@ -21,10 +20,8 @@ class HostRouter(ConfigReadingRequestHandler):
 
 class PathRouter(ConfigReadingRequestHandler):
     async def get(self, path: str) -> None:
-        _ = path
-        full_path = self.request.path
+        full_path = "/" + path
         await self.healthcheck()
-
         await self.forward_incoming_request_to_server("path", "paths", full_path)
 
 

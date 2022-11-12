@@ -1,3 +1,4 @@
+# example host and path based config file (used for intergration tests)
 hosts:
   - host: www.a.com
     servers:

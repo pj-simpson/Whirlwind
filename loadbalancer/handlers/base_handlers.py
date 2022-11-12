@@ -4,7 +4,7 @@ import tornado.web
 import yaml
 from tornado.httpclient import AsyncHTTPClient
 
-from src.whirlwind.backend_servers.backend_servers import Server
+from whirlwind.servers.backend_servers import Server
 
 
 class ConfigReadingRequestHandler(tornado.web.RequestHandler):
