@@ -61,7 +61,7 @@ class ConfigReadingRequestHandler(tornado.web.RequestHandler):
                 [server for server in self.register[host_or_path] if server.healthy]
             )
         else:
-            return "Raise 404"
+            return Server(endpoint='localhost:404',healthy=False)
 
     async def forward_incoming_request_to_server(
         self,
@@ -69,13 +69,10 @@ class ConfigReadingRequestHandler(tornado.web.RequestHandler):
     ) -> None:
         http_client = AsyncHTTPClient()
         healthy_server = self.get_healthy_server(host_or_path)
-        # TODO This is nasty sort this
-        if healthy_server == "Raise 404":
-            self.set_status(404)
-        elif type(healthy_server) == Server:
+        if healthy_server.healthy:
             response = await http_client.fetch(f"http://{healthy_server.endpoint}")
             response_message = response.body.decode("utf-8")
             self.set_status(response.code)
             self.write(response_message)
         else:
-            self.set_status(503, "No healthy backend servers found")
+            self.set_status(404)
