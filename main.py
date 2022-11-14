@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import tornado.ioloop
 import tornado.options
 import tornado.web
