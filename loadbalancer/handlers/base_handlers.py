@@ -1,12 +1,9 @@
-import random
-import dill
-import typing
-
 import tornado.web
 import yaml
 from tornado.httpclient import AsyncHTTPClient
 
 from loadbalancer.servers.backend_servers import Server
+import builtins
 
 
 class ConfigReadingRequestHandler(tornado.web.RequestHandler):
@@ -56,40 +53,43 @@ class ConfigReadingRequestHandler(tornado.web.RequestHandler):
             for server in self.register[item]:
                 await server.do_healthcheck_and_update_status()
 
-    def get_healthy_server(self, host_or_path: str) -> typing.Union[Server, str]:
+    def get_healthy_server(self, host_or_path: str) -> Server:
+        server_tracker = builtins.server_tracker
         if host_or_path in self.register.keys():
-            all_healthy_servers = [server for server in self.register[host_or_path] if server.healthy]
+            all_healthy_servers = [
+                server for server in self.register[host_or_path] if server.healthy
+            ]
             length_of_all_healthy_servers = len(all_healthy_servers)
-            with open('last_used_cache','r+b') as cache_file:
-                cache = dill.load(cache_file)
 
-                # first fetch for host/path = get first server from array
-                if host_or_path not in cache:
+            # first fetch for host/path = get first server from array
+            if host_or_path not in server_tracker:
+                first_healthy_server = all_healthy_servers[0]
+                server_tracker[host_or_path] = first_healthy_server
+                builtins.server_tracker = server_tracker
+                return first_healthy_server
+            # only one server, use that
+            elif len(all_healthy_servers) == 1:
+                first_healthy_server = all_healthy_servers[0]
+                server_tracker[host_or_path] = first_healthy_server
+                builtins.server_tracker = server_tracker
+                return first_healthy_server
+            else:
+                index_of_last_server = all_healthy_servers.index(
+                    server_tracker[host_or_path]
+                )
+                index_of_next_server = index_of_last_server + 1
+                if index_of_next_server >= length_of_all_healthy_servers:
                     first_healthy_server = all_healthy_servers[0]
-                    cache['host_or_path'] = first_healthy_server
-                    dill.dump(cache,cache_file)
-                    return first_healthy_server
-                # only one server, use that
-                elif len(all_healthy_servers) == 1:
-                    first_healthy_server = all_healthy_servers[0]
-                    cache['host_or_path'] = first_healthy_server
-                    dill.dump(cache,cache_file)
+                    server_tracker[host_or_path] = first_healthy_server
+                    builtins.server_tracker = server_tracker
                     return first_healthy_server
                 else:
-                    index_of_last_server = all_healthy_servers.index(cache['host_or_path'])
-                    index_of_next_server = index_of_last_server + 1
-                    if index_of_next_server > length_of_all_healthy_servers:
-                        first_healthy_server = all_healthy_servers[0]
-                        cache['host_or_path'] = first_healthy_server
-                        dill.dump(cache,cache_file)
-                        return first_healthy_server
-                    else:
-                        next_healthy_server = all_healthy_servers[index_of_next_server]
-                        cache['host_or_path'] = next_healthy_server
-                        dill.dump(cache,cache_file)
-                        return next_healthy_server
+                    next_healthy_server = all_healthy_servers[index_of_next_server]
+                    server_tracker[host_or_path] = next_healthy_server
+                    builtins.server_tracker = server_tracker
+                    return next_healthy_server
         else:
-            return Server(endpoint='localhost:404',healthy=False)
+            return Server(endpoint="localhost:404", healthy=False)
 
     async def forward_incoming_request_to_server(
         self,

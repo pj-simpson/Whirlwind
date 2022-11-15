@@ -2,7 +2,7 @@ from tornado.httpclient import AsyncHTTPClient, HTTPClientError
 
 
 class Server:
-    def __init__(self, endpoint, path="/healthcheck",healthy=True):
+    def __init__(self, endpoint, path="/healthcheck", healthy=True):
         self.endpoint = endpoint
         self.path = path
         self.healthy = healthy
