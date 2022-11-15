@@ -2,6 +2,8 @@
 import tornado.ioloop
 import tornado.options
 import tornado.web
+import dill
+
 from tornado.options import define, options
 
 from loadbalancer.handlers.base_handlers import ConfigReadingRequestHandler
@@ -27,6 +29,7 @@ class PathRouter(ConfigReadingRequestHandler):
 
 
 def make_app() -> tornado.web.Application:
+
     return tornado.web.Application(
         handlers=[
             (r"/", HostRouter),
@@ -36,6 +39,11 @@ def make_app() -> tornado.web.Application:
 
 
 if __name__ == "__main__":
+    # initialize cache
+    with open('last_used_cache', 'ab') as cache:
+        # ugly hack as an empty python object will cause trouble later
+        dill.dump({'init': 'arb'}, cache)
+
     tornado.options.parse_command_line()
     app = make_app()
     app.listen(options.port)

@@ -1,4 +1,5 @@
 import random
+import dill
 import typing
 
 import tornado.web
@@ -57,9 +58,36 @@ class ConfigReadingRequestHandler(tornado.web.RequestHandler):
 
     def get_healthy_server(self, host_or_path: str) -> typing.Union[Server, str]:
         if host_or_path in self.register.keys():
-            return random.choice(
-                [server for server in self.register[host_or_path] if server.healthy]
-            )
+            all_healthy_servers = [server for server in self.register[host_or_path] if server.healthy]
+            length_of_all_healthy_servers = len(all_healthy_servers)
+            with open('last_used_cache','r+b') as cache_file:
+                cache = dill.load(cache_file)
+
+                # first fetch for host/path = get first server from array
+                if host_or_path not in cache:
+                    first_healthy_server = all_healthy_servers[0]
+                    cache['host_or_path'] = first_healthy_server
+                    dill.dump(cache,cache_file)
+                    return first_healthy_server
+                # only one server, use that
+                elif len(all_healthy_servers) == 1:
+                    first_healthy_server = all_healthy_servers[0]
+                    cache['host_or_path'] = first_healthy_server
+                    dill.dump(cache,cache_file)
+                    return first_healthy_server
+                else:
+                    index_of_last_server = all_healthy_servers.index(cache['host_or_path'])
+                    index_of_next_server = index_of_last_server + 1
+                    if index_of_next_server > length_of_all_healthy_servers:
+                        first_healthy_server = all_healthy_servers[0]
+                        cache['host_or_path'] = first_healthy_server
+                        dill.dump(cache,cache_file)
+                        return first_healthy_server
+                    else:
+                        next_healthy_server = all_healthy_servers[index_of_next_server]
+                        cache['host_or_path'] = next_healthy_server
+                        dill.dump(cache,cache_file)
+                        return next_healthy_server
         else:
             return Server(endpoint='localhost:404',healthy=False)
 
