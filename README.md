@@ -3,6 +3,8 @@
 Whirlwind is a brutally simple HTTP loadbalancer, created using only the Tornado library's Web
 framework features.
 
+![](whirlwind.gif)
+
 ## Motivation/Influence
 
 I was looking into deploying Web Services built using the Tornado framework and couldn't find
@@ -10,11 +12,8 @@ a loadbalancer '_dumb_' enough for my liking. I just wanted to cycle through man
 iterations of the same service one-by-one, with minimal configuration and other options. Then it came to me... 
 I could also use Tornado for this purpose! 
 
-A lot of the _underlying_ design of this project is taken from the course
-'_Creating an HTTP Load Balancer in Python_' by Neeran Gul, in particular using docker compose to spin up
-multiple lightweight backends to perform integration testing 
-and parsing a YAML config file. The loadbalancing application itself
-has been mostly re-written, (the course makes use of Flask, for instance).
+A lot of the _underlying_ design of this project is influenced by the course
+'_Creating an HTTP Load Balancer in Python_' by Neeran Gul. 
 You can find the course on: http://testdriven.io.
 
 ## Features
@@ -80,5 +79,5 @@ pkill -INT -f "python3 ./main.py"
 ```
 ## Note
 
-Whilst I'm pleasantly surprised at the results and will undoubtedly try to rebuild this one day 
-in a more '_production-quality_' manner, this is a curio and shouldn't be used!
+Whilst I'm pleasantly surprised at the results, (there seems to be a decent tolerance for concurrency),
+this is a curio and shouldn't be used in production!

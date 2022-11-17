@@ -102,5 +102,6 @@ class ConfigReadingRequestHandler(tornado.web.RequestHandler):
             response_message = response.body.decode("utf-8")
             self.set_status(response.code)
             self.write(response_message)
+            print(healthy_server)
         else:
             self.set_status(404)
