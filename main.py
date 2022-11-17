@@ -4,7 +4,6 @@ import builtins
 import tornado.ioloop
 import tornado.options
 import tornado.web
-import dill
 
 from tornado.options import define, options
 

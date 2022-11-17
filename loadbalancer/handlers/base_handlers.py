@@ -67,7 +67,7 @@ class ConfigReadingRequestHandler(tornado.web.RequestHandler):
                 server_tracker[host_or_path] = first_healthy_server
                 builtins.server_tracker = server_tracker
                 return first_healthy_server
-            # only one server, use that
+            # only one server? use that!
             elif len(all_healthy_servers) == 1:
                 first_healthy_server = all_healthy_servers[0]
                 server_tracker[host_or_path] = first_healthy_server
